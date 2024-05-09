@@ -9,16 +9,15 @@ factory.Uri = new Uri("amqps://yunsubup:eOTyDZ80baa2afV_AR_VS-O16GCeYKlq@fish.rm
 using (var connection = factory.CreateConnection())
 {
     var channel = connection.CreateModel();
-    channel.QueueDeclare("hello-queue", true, false, false);
 
-    //rabbitmq ya mesajlar byte dizisi olarak gönderilebildiği için herşey gönderebiliriz
+    channel.ExchangeDeclare("logs-famout", durable: true, type: ExchangeType.Fanout);
 
     Enumerable.Range(1, 50).ToList().ForEach(x =>
     {
-        string message = $"Message [{x}]";
+        string message = $"Log [{x}]";
         var messageBody = Encoding.UTF8.GetBytes(message);
 
-        channel.BasicPublish(string.Empty, "hello-queue", null, messageBody);
+        channel.BasicPublish("logs-famout", "", null, messageBody);
         Console.WriteLine($"Mesaj gönderilmişltir. {message} {DateTime.Now}");
     });
 
