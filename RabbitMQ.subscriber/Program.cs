@@ -1,6 +1,8 @@
 ﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using Shared;
 using System.Text;
+using System.Text.Json;
 
 var factory = new ConnectionFactory();
 factory.Uri = new Uri("amqps://yunsubup:eOTyDZ80baa2afV_AR_VS-O16GCeYKlq@fish.rmq.cloudamqp.com/yunsubup");
@@ -12,25 +14,29 @@ using (var connection = factory.CreateConnection())
     var consumer = new EventingBasicConsumer(channel);
     var queueName = channel.QueueDeclare().QueueName;
 
-    //* => tek stringe karşılık gelir # =>birden fazla stringe karşılık gelir
+    Dictionary<string, object> headers = new Dictionary<string, object>();
+
+    headers.Add("format", "pdf");
+    headers.Add("shape", "a4");
+    headers.Add("x-match", "any");//any olursa key-value çiftlerinin bire bile eşit olursa publisher tarafıyla sonuç alınır
+                                  //headers.Add("x-match", "all");//all olursa key-value çiftlerinin hepsi eşit olmalı publisher tarafıyla
+
+    //header-exchange -> publisher oluşturuyor eğer ki publisher çalışmadan burası çalışırsa hata verir hata vermesini istemessek her iki tarafta da oluşturabiliriz.
 
 
-    //var routeKey = "*.Error.*";//başı ve sonu önemli değil ortasında error olan mesajlar gelsin
-    //var routeKey = "*.*.Warning";//başı ve ortası önemli değil sonunda warning olan mesajlar gelsin
-    var routeKey = "Info.#";//başı info olsun sonrası önemli değil
+    channel.QueueBind(queueName, "header-exchange", string.Empty, headers);
+    channel.BasicConsume(queueName, false, consumer);//subscribe-consumer düşünce kuyrukta düşssün
 
-    channel.QueueBind(queueName, "logs-topic", routeKey);//subscribe düşünce kuyrukta düşssün
-
-    channel.BasicConsume(queueName, false, consumer);
     Console.WriteLine("Loglar dinleniyor....");
 
     consumer.Received += (object sender, BasicDeliverEventArgs e) =>
     {
         var message = Encoding.UTF8.GetString(e.Body.ToArray());
 
+        Product product = JsonSerializer.Deserialize<Product>(message);
         Thread.Sleep(1500);
-        Console.WriteLine("Gelen Mesaj: " + message);
-        // File.AppendAllText("log-critical.txt", message + "\n");
+        Console.WriteLine("Gelen Mesaj: " + $"{product.Id + " " + product.Name + " " + product.Price + " " + product.Stock}");
+
         channel.BasicAck(e.DeliveryTag, false);
     };
     Console.ReadLine();

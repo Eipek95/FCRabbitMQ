@@ -1,5 +1,7 @@
 ﻿using RabbitMQ.Client;
+using Shared;
 using System.Text;
+using System.Text.Json;
 
 
 public enum LogNames
@@ -21,25 +23,30 @@ public class Program
         using (var connection = factory.CreateConnection())
         {
             var channel = connection.CreateModel();
-            channel.ExchangeDeclare("logs-topic", durable: true, type: ExchangeType.Topic);
+            channel.ExchangeDeclare("header-exchange", durable: true, type: ExchangeType.Headers);
 
-            Random rnd = new Random();
-            Enumerable.Range(1, 50).ToList().ForEach(x =>
+            Dictionary<string, object> headers = new Dictionary<string, object>();
+
+            headers.Add("format", "pdf");
+            headers.Add("shape2", "a4");
+
+            var properties = channel.CreateBasicProperties();
+            properties.Headers = headers;
+            properties.Persistent = true;//mesajları kalıcı hale getirir.rabbitmq restart olsa bile mesajlar silinmeyecek
+
+
+            var product = new Product
             {
+                Id = 1,
+                Name = "Kalem",
+                Price = 100,
+                Stock = 10
+            };
 
-                LogNames log1 = (LogNames)rnd.Next(1, 5);
-                LogNames log2 = (LogNames)rnd.Next(1, 5);
-                LogNames log3 = (LogNames)rnd.Next(1, 5);
+            var productJsonString = JsonSerializer.Serialize<Product>(product);
+            channel.BasicPublish("header-exchange", string.Empty, properties, Encoding.UTF8.GetBytes(productJsonString));
 
-
-                var routeKey = $"{log1}.{log2}.{log3}";
-                string message = $"log-type: [{log1}-{log2}-{log3}]";
-                var messageBody = Encoding.UTF8.GetBytes(message);
-
-                channel.BasicPublish("logs-topic", routeKey, null, messageBody);
-                Console.WriteLine($"Log gönderilmişltir. {message} {DateTime.Now}");
-            });
-
+            Console.WriteLine("mesaj gönderilmiştir!");
             Console.ReadLine();
 
         }
