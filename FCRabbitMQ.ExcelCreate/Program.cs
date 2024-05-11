@@ -1,6 +1,8 @@
 using FCRabbitMQ.ExcelCreate.Models;
+using FCRabbitMQ.ExcelCreate.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +10,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddSingleton(sp => new ConnectionFactory()
+{
+    Uri = new Uri(builder.Configuration.GetConnectionString("RabbitMQ")),
+    DispatchConsumersAsync = true
+});
+builder.Services.AddSingleton<RabbitMQClientService>();
+
+
+
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"));
@@ -16,6 +28,9 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(opt =>
 {
     opt.User.RequireUniqueEmail = true;
 }).AddEntityFrameworkStores<AppDbContext>();
+
+
+
 var app = builder.Build();
 
 
