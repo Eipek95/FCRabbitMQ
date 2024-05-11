@@ -1,3 +1,4 @@
+using FCRabbitMQ.ExcelCreate.Hubs;
 using FCRabbitMQ.ExcelCreate.Models;
 using FCRabbitMQ.ExcelCreate.Services;
 using Microsoft.AspNetCore.Identity;
@@ -10,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddSignalR();
 builder.Services.AddSingleton(sp => new ConnectionFactory()
 {
     Uri = new Uri(builder.Configuration.GetConnectionString("RabbitMQ")),
@@ -64,8 +65,8 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHub<MyHub>("/MyHub");
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
 app.Run();

@@ -1,5 +1,7 @@
-﻿using FCRabbitMQ.ExcelCreate.Models;
+﻿using FCRabbitMQ.ExcelCreate.Hubs;
+using FCRabbitMQ.ExcelCreate.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace FCRabbitMQ.ExcelCreate.Controllers
@@ -9,10 +11,12 @@ namespace FCRabbitMQ.ExcelCreate.Controllers
     public class FilesController : ControllerBase
     {
         private readonly AppDbContext _appDbContext;
+        private readonly IHubContext<MyHub> _hubContext;
 
-        public FilesController(AppDbContext appDbContext)
+        public FilesController(AppDbContext appDbContext, IHubContext<MyHub> hubContext)
         {
             _appDbContext = appDbContext;
+            _hubContext = hubContext;
         }
 
         [HttpPost]
@@ -36,6 +40,8 @@ namespace FCRabbitMQ.ExcelCreate.Controllers
 
             await _appDbContext.SaveChangesAsync();
             //signalr notification
+
+            await _hubContext.Clients.User(userFile.UserId).SendAsync("CompletedFile");
             return Ok();
         }
     }

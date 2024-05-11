@@ -35,6 +35,7 @@ namespace FileCreateWorkerService
         {
             var consumer = new AsyncEventingBasicConsumer(_channel);
 
+            _channel.BasicConsume(RabbitMQService.QueueName, false, consumer);
             consumer.Received += Consumer_Received;
 
             return Task.CompletedTask;
@@ -87,13 +88,13 @@ namespace FileCreateWorkerService
             DataTable table = new DataTable { TableName = tableName };
             table.Columns.Add("ProductId", typeof(int));
             table.Columns.Add("Name", typeof(string));
-            table.Columns.Add("ProductNumber", typeof(int));
+            //table.Columns.Add("ProductNumber", typeof(int));
             table.Columns.Add("Color", typeof(string));
 
 
             products.ForEach(x =>
             {
-                table.Rows.Add(x.ProductId, x.Name, x.ProductNumber, x.Color);
+                table.Rows.Add(x.ProductId, x.Name, x.Color);
             });
 
             return table;
