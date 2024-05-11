@@ -1,4 +1,5 @@
 ﻿using FCRabbitMQ.ExcelCreate.Models;
+using FCRabbitMQ.ExcelCreate.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,11 +12,13 @@ namespace FCRabbitMQ.ExcelCreate.Controllers
     {
         private readonly AppDbContext _appDbContext;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly RabbitMQPublisher _rabbitMQPublisher;
 
-        public ProductController(AppDbContext appDbContext, UserManager<IdentityUser> userManager)
+        public ProductController(AppDbContext appDbContext, UserManager<IdentityUser> userManager, RabbitMQPublisher rabbitMQPublisher)
         {
             _appDbContext = appDbContext;
             _userManager = userManager;
+            _rabbitMQPublisher = rabbitMQPublisher;
         }
 
         public IActionResult Index()
@@ -38,7 +41,15 @@ namespace FCRabbitMQ.ExcelCreate.Controllers
             await _appDbContext.UserFiles.AddAsync(userFile);
 
             await _appDbContext.SaveChangesAsync();
-            //rabbitmq mesaj gönder
+
+
+            //message brokera gönderiyor mesajı
+            _rabbitMQPublisher.Publish(new Shared.CreateExcelMessage
+            {
+                FileId = userFile.Id,
+            });
+
+
             TempData["StartCreatingExcel"] = true;
             return RedirectToAction(nameof(ProductController.Files));
         }

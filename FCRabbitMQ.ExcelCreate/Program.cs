@@ -17,6 +17,7 @@ builder.Services.AddSingleton(sp => new ConnectionFactory()
     DispatchConsumersAsync = true
 });
 builder.Services.AddSingleton<RabbitMQClientService>();
+builder.Services.AddSingleton<RabbitMQPublisher>();
 
 
 
