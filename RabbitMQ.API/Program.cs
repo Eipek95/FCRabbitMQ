@@ -1,3 +1,9 @@
+﻿using Microsoft.EntityFrameworkCore;
+using RabbitMQ.API;
+using RabbitMQ.API.Services;
+using RabbitMQ.Client;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -7,6 +13,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+builder.Services.AddDbContext<AppDbContext>(opt =>
+{
+    opt.UseInMemoryDatabase(databaseName: "productDb");
+});
+builder.Services.AddSingleton(sp => new ConnectionFactory() { Uri = new Uri(builder.Configuration.GetConnectionString("RabbitMQ")!) });
+builder.Services.AddSingleton<RabbitMQService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -21,5 +34,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
 
 app.Run();
