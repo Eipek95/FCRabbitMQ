@@ -57,6 +57,8 @@ namespace FCRabbitMQ.ExcelCreate.Controllers
         public async Task<IActionResult> Files()
         {
             var user = await _userManager.FindByNameAsync(User.Identity!.Name!);
+            var departmentId = await _appDbContext.UserDepartments.Where(x => x.UserId == user.Id).Select(x => x.DepartmentId).FirstAsync();
+            ViewBag.departmentName = _appDbContext.Departments.Find(departmentId)!.Name;
             return View(await _appDbContext.UserFiles.Where(x => x.UserId == user.Id).OrderByDescending(x => x.Id).ToListAsync());
         }
     }

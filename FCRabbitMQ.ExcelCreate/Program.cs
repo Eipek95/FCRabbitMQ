@@ -48,6 +48,33 @@ using (var scope = app.Services.CreateScope())
     {
         userManager.CreateAsync(new IdentityUser() { UserName = "deneme", Email = "deneme@gmail.com" }, password: "Password12*").Wait();//async to sync
         userManager.CreateAsync(new IdentityUser() { UserName = "deneme2", Email = "deneme2@gmail.com" }, password: "Password12*").Wait();
+        userManager.CreateAsync(new IdentityUser() { UserName = "deneme3", Email = "deneme3@gmail.com" }, password: "Password12*").Wait();
+        userManager.CreateAsync(new IdentityUser() { UserName = "deneme4", Email = "deneme4@gmail.com" }, password: "Password12*").Wait();
+        userManager.CreateAsync(new IdentityUser() { UserName = "deneme5", Email = "deneme5@gmail.com" }, password: "Password12*").Wait();
+    }
+
+    if (!appDbContext.Departments.Any())
+    {
+        appDbContext.Departments.AddRange(new Department[]
+        {
+            new Department(){Name="Department1"},
+            new Department(){Name="Department2"}
+        });
+        appDbContext.SaveChangesAsync().Wait();
+    }
+
+    if (!appDbContext.UserDepartments.Any())
+    {
+        appDbContext.UserDepartments.AddRange(new UserDepartment[]
+        {
+            new UserDepartment(){DepartmentId=1,UserId="23258478-8dff-42f4-8d66-3f203a11d351"},
+            new UserDepartment(){DepartmentId=1,UserId="8dda65c6-069d-4f78-8f38-b4fcb4df352c"},
+            new UserDepartment(){DepartmentId=1,UserId="4d866636-1302-4555-8207-bd62852a58fe"},
+            new UserDepartment(){DepartmentId=2,UserId="a1bd3b40-c6b4-41a2-99e7-1857cac18bac"},
+            new UserDepartment(){DepartmentId=2,UserId="5357c432-0c4c-41c1-b90d-9b4d254a4410"},
+        });
+
+        appDbContext.SaveChangesAsync().Wait();
     }
 }
 // Configure the HTTP request pipeline.

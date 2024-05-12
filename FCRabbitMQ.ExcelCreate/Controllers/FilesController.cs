@@ -13,6 +13,7 @@ namespace FCRabbitMQ.ExcelCreate.Controllers
         private readonly AppDbContext _appDbContext;
         private readonly IHubContext<MyHub> _hubContext;
 
+
         public FilesController(AppDbContext appDbContext, IHubContext<MyHub> hubContext)
         {
             _appDbContext = appDbContext;
@@ -41,7 +42,13 @@ namespace FCRabbitMQ.ExcelCreate.Controllers
             await _appDbContext.SaveChangesAsync();
             //signalr notification
 
-            await _hubContext.Clients.User(userFile.UserId).SendAsync("CompletedFile");
+            var usersInSameDepartment = _appDbContext.UserDepartments
+             .Where(ud => ud.DepartmentId == _appDbContext.UserDepartments.FirstOrDefault(d => d.UserId == userFile.UserId).DepartmentId)
+             .Select(ud => ud.UserId)
+             .ToList();
+
+            var fileUploadUserName = _appDbContext.Users.Find(userFile.UserId)!.UserName;
+            await _hubContext.Clients.Users(usersInSameDepartment).SendAsync("ReceiveNotification", $"Uploaded file by {fileUploadUserName}");
             return Ok();
         }
     }

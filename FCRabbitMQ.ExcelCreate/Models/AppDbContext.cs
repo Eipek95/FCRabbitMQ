@@ -11,5 +11,7 @@ namespace FCRabbitMQ.ExcelCreate.Models
         }
 
         public DbSet<UserFile> UserFiles { get; set; }
+        public DbSet<UserDepartment> UserDepartments { get; set; }
+        public DbSet<Department> Departments { get; set; }
     }
 }

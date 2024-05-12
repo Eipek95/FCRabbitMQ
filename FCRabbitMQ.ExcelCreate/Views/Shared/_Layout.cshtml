@@ -81,19 +81,19 @@
                 })
             }
 
-            //files api içindeki Completedfile methoda subcribe olacaz
-            connection.on("CompletedFile", () => {
+            //files api içindeki Completedfile methoda subcribe olacaz  completedfile adını şimdilik sildim
+            connection.on("ReceiveNotification", function (message) {
 
 
 
 
-                console.log("Excel oluşturma bitti");
+                console.log(message);
 
 
                 Swal.fire({
                     position: 'top-end',
                     icon: 'success',
-                    title: 'Excel Dosyanız Hazır',
+                    title: message,
                     showConfirmButton: true,
                     confirmButtonText:'Dosyalarım'
                 }).then((result) => {

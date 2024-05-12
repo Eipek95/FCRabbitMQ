@@ -4,5 +4,6 @@ namespace FCRabbitMQ.ExcelCreate.Hubs
 {
     public class MyHub : Hub
     {
+
     }
 }
