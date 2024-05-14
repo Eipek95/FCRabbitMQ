@@ -1,6 +1,78 @@
 ﻿@{
     ViewData["Title"] = "Privacy Policy";
+    int count = 0;
 }
-<h1>@ViewData["Title"]</h1>
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
-<p>Use this page to detail your site's privacy policy.</p>
+
+@model List<ProductSubcategory>
+
+
+<h1 class="animate__animated animate__tada text-center text-danger">Alt Kategoriler ve Ürünleri</h1>
+
+
+
+
+
+<table class="table table-striped table-responsive">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Başlık</th>
+            <th scope="col">Güncellenme Tarihi</th>
+            <th scope="col">Kategori</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model as List<ProductSubcategory>)
+        {
+            count++;
+            <tr data-bs-toggle="collapse" data-bs-target="#accordion@(count)" aria-expanded="false" aria-controls="accordion1">
+                <th scope="row">@item.ProductSubcategoryId</th>
+                <td>@item.Name</td>
+                <td>@item.ModifiedDate.ToShortDateString()</td>
+                <td>@item.ProductCategory.Name</td>
+            </tr>
+            <tr>
+                <td colspan="3" class="p-0">
+                    <div class="accordion accordion-flush collapse" id="accordion@(count)">
+                        <div class="accordion-body">
+                            <table class="table ">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th>Ürün Adı</th>
+                                        <th>Ürün Sınıfı</th>
+                                        <th>Ürün Rengi</th>
+                                        <th>Ürün Satılabilirlik</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var product in item.Products)
+                                    {
+
+                                        if (product.FinishedGoodsFlag)
+                                        {
+                                            <tr class="alert alert-danger">
+                                                <th scope="row">@product.ProductId</th>
+                                                <td>@product.Name</td>
+                                                <td>@product.Class</td>
+                                                <td>@product.Color</td>
+                                                <td>@product.FinishedGoodsFlag</td>
+                                            </tr>
+                                        }
+                                        
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+

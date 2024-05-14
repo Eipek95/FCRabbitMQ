@@ -15,6 +15,9 @@ public partial class AdventureWorks2019Context : DbContext
 
     public virtual DbSet<Product> Products { get; set; }
 
+    public virtual DbSet<ProductCategory> ProductCategories { get; set; }
+
+    public virtual DbSet<ProductSubcategory> ProductSubcategories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -106,6 +109,67 @@ public partial class AdventureWorks2019Context : DbContext
                 .HasMaxLength(3)
                 .IsFixedLength()
                 .HasComment("Unit of measure for Weight column.");
+
+            entity.HasOne(d => d.ProductSubcategory).WithMany(p => p.Products).HasForeignKey(d => d.ProductSubcategoryId);
+        });
+
+        modelBuilder.Entity<ProductCategory>(entity =>
+        {
+            entity.HasKey(e => e.ProductCategoryId).HasName("PK_ProductCategory_ProductCategoryID");
+
+            entity.ToTable("ProductCategory", "Production", tb => tb.HasComment("High-level product categorization."));
+
+            entity.HasIndex(e => e.Name, "AK_ProductCategory_Name").IsUnique();
+
+            entity.HasIndex(e => e.Rowguid, "AK_ProductCategory_rowguid").IsUnique();
+
+            entity.Property(e => e.ProductCategoryId)
+                .HasComment("Primary key for ProductCategory records.")
+                .HasColumnName("ProductCategoryID");
+            entity.Property(e => e.ModifiedDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasComment("Date and time the record was last updated.")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Name)
+                .HasMaxLength(50)
+                .HasComment("Category description.");
+            entity.Property(e => e.Rowguid)
+                .HasDefaultValueSql("(newid())")
+                .HasComment("ROWGUIDCOL number uniquely identifying the record. Used to support a merge replication sample.")
+                .HasColumnName("rowguid");
+        });
+
+        modelBuilder.Entity<ProductSubcategory>(entity =>
+        {
+            entity.HasKey(e => e.ProductSubcategoryId).HasName("PK_ProductSubcategory_ProductSubcategoryID");
+
+            entity.ToTable("ProductSubcategory", "Production", tb => tb.HasComment("Product subcategories. See ProductCategory table."));
+
+            entity.HasIndex(e => e.Name, "AK_ProductSubcategory_Name").IsUnique();
+
+            entity.HasIndex(e => e.Rowguid, "AK_ProductSubcategory_rowguid").IsUnique();
+
+            entity.Property(e => e.ProductSubcategoryId)
+                .HasComment("Primary key for ProductSubcategory records.")
+                .HasColumnName("ProductSubcategoryID");
+            entity.Property(e => e.ModifiedDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasComment("Date and time the record was last updated.")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Name)
+                .HasMaxLength(50)
+                .HasComment("Subcategory description.");
+            entity.Property(e => e.ProductCategoryId)
+                .HasComment("Product category identification number. Foreign key to ProductCategory.ProductCategoryID.")
+                .HasColumnName("ProductCategoryID");
+            entity.Property(e => e.Rowguid)
+                .HasDefaultValueSql("(newid())")
+                .HasComment("ROWGUIDCOL number uniquely identifying the record. Used to support a merge replication sample.")
+                .HasColumnName("rowguid");
+
+            entity.HasOne(d => d.ProductCategory).WithMany(p => p.ProductSubcategories)
+                .HasForeignKey(d => d.ProductCategoryId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         OnModelCreatingPartial(modelBuilder);

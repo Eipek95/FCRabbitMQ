@@ -26,6 +26,10 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"));
 });
+builder.Services.AddDbContext<AdventureWorks2019Context>(opt =>
+{
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer2"));
+});
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(opt =>
 {
     opt.User.RequireUniqueEmail = true;
